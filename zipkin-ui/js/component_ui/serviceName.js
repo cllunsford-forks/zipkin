@@ -4,6 +4,8 @@ import $ from 'jquery';
 import chosen from 'chosen-npm/public/chosen.jquery.js'; // eslint-disable-line no-unused-vars
 import queryString from 'query-string';
 
+import { fetchServices, selectService } from '../actions/services'
+
 export default component(function serviceName() {
   this.onChange = function() {
     Cookies.set('last-serviceName', this.$node.val());
@@ -12,6 +14,7 @@ export default component(function serviceName() {
 
   this.triggerChange = function(name) {
     this.$node.trigger('uiChangeServiceName', name);
+    this.attr.store.dispatch(selectService(name));
   };
 
   this.updateServiceNameDropdown = function(ev, data) {
@@ -39,6 +42,10 @@ export default component(function serviceName() {
 
     this.$node.chosen({search_contains: true});
     this.on('change', this.onChange);
-    this.on(document, 'dataServiceNames', this.updateServiceNameDropdown);
+    this.attr.store.subscribe(() => {
+      const state = this.attr.store.getState()
+
+      this.updateServiceNameDropdown({}, {names: state.serviceNames, lastServiceName: state.selectedService});
+    })
   });
 });

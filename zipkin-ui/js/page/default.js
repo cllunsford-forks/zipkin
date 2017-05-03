@@ -4,7 +4,6 @@ import timeago from 'timeago'; // eslint-disable-line no-unused-vars
 import queryString from 'query-string';
 import DefaultData from '../component_data/default';
 import SpanNamesData from '../component_data/spanNames';
-import ServiceNamesData from '../component_data/serviceNames';
 import ServiceNameUI from '../component_ui/serviceName';
 import SpanNameUI from '../component_ui/spanName';
 import InfoPanelUI from '../component_ui/infoPanel';
@@ -15,6 +14,9 @@ import TracesUI from '../component_ui/traces';
 import TimeStampUI from '../component_ui/timeStamp';
 import BackToTop from '../component_ui/backToTop';
 import {defaultTemplate} from '../templates';
+import {getError} from '../component_ui/error';
+
+import { fetchServices, selectService } from '../actions/services'
 
 const DefaultPageComponent = component(function DefaultPage() {
   const sortOptions = [
@@ -38,6 +40,22 @@ const DefaultPageComponent = component(function DefaultPage() {
   this.after('initialize', function() {
     window.document.title = 'Zipkin - Index';
     this.trigger(document, 'navigate', {route: 'index'});
+
+    // Begin Redux Bridge
+    this.on('uiChangeServiceName', (e, name) => {
+      this.attr.store.dispatch(selectService(name))
+    });
+
+    this.attr.store.subscribe(() => {
+      const state = this.attr.store.getState()
+
+      if (state.serviceError) {
+        this.trigger('uiServerError', getError('cannot load service names', state.serviceError));
+      }
+    })
+
+    this.attr.store.dispatch(fetchServices())
+    // End Redux Bridge
 
     const query = queryString.parse(window.location.search);
 
@@ -66,8 +84,7 @@ const DefaultPageComponent = component(function DefaultPage() {
       }));
 
       SpanNamesData.attachTo(document);
-      ServiceNamesData.attachTo(document);
-      ServiceNameUI.attachTo('#serviceName');
+      ServiceNameUI.attachTo('#serviceName', {store: this.attr.store});
       SpanNameUI.attachTo('#spanName');
       InfoPanelUI.attachTo('#infoPanel');
       InfoButtonUI.attachTo('button.info-request');
@@ -92,6 +109,6 @@ const DefaultPageComponent = component(function DefaultPage() {
   });
 });
 
-export default function initializeDefault(config) {
-  DefaultPageComponent.attachTo('.content', {config});
+export default function initializeDefault(store, config) {
+  DefaultPageComponent.attachTo('.content', {store, config});
 }
