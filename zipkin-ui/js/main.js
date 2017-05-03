@@ -1,3 +1,7 @@
+import 'babel-polyfill'
+import 'whatwg-fetch'
+
+// Flightjs
 import {compose, registry, advice, debug} from 'flightjs';
 import crossroads from 'crossroads';
 import initializeDefault from './page/default';
@@ -6,6 +10,10 @@ import initializeDependency from './page/dependency';
 import CommonUI from './page/common';
 import loadConfig from './config';
 import {errToStr} from './component_ui/error';
+
+// React
+import configStore from './store/configStore'
+const store = configStore()
 
 loadConfig().then(config => {
   debug.enable(true);

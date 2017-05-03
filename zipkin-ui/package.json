@@ -24,7 +24,10 @@
     "lodash": "^4.5.0",
     "moment": "^2.11.2",
     "query-string": "^3.0.0",
-    "timeago": "^1.5.1"
+    "redux": "^3.6.0",
+    "redux-thunk": "^2.2.0",
+    "timeago": "^1.5.1",
+    "whatwg-fetch": "^2.0.3"
   },
   "devDependencies": {
     "babel-core": "^6.4.5",
