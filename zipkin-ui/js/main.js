@@ -22,7 +22,7 @@ loadConfig().then(config => {
   CommonUI.attachTo(window.document.body, {config});
 
   crossroads.addRoute('', () => initializeDefault(store, config));
-  crossroads.addRoute('traces/{id}', traceId => initializeTrace(traceId, config));
+  crossroads.addRoute('traces/{id}', traceId => initializeTrace(store, traceId, config));
   crossroads.addRoute('dependency', () => initializeDependency(config));
   crossroads.parse(window.location.pathname);
 }, e => {

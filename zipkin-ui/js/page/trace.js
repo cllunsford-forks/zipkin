@@ -1,6 +1,5 @@
 import {component} from 'flightjs';
 import $ from 'jquery';
-import TraceData from '../component_data/trace';
 import FilterAllServicesUI from '../component_ui/filterAllServices';
 import FullPageSpinnerUI from '../component_ui/fullPageSpinner';
 import JsonPanelUI from '../component_ui/jsonPanel';
@@ -10,17 +9,28 @@ import TraceUI from '../component_ui/trace';
 import FilterLabelUI from '../component_ui/filterLabel';
 import ZoomOut from '../component_ui/zoomOutSpans';
 import {traceTemplate} from '../templates';
+import traceToMustache from '../../js/component_ui/traceToMustache';
+import { fetchTrace } from '../actions/trace'
 
 const TracePageComponent = component(function TracePage() {
   this.after('initialize', function() {
     window.document.title = 'Zipkin - Traces';
 
-    TraceData.attachTo(document, {
-      traceId: this.attr.traceId,
-      logsUrl: this.attr.config('logsUrl')
-    });
-    this.on(document, 'tracePageModelView', function(ev, data) {
-      this.$node.html(traceTemplate(data.modelview));
+    let logsUrl = this.attr.config('logsUrl')
+    if (logsUrl) {
+      logsUrl = logsUrl.replace('{traceId}', this.attr.traceId);
+    }
+
+    this.attr.store.subscribe(() => {
+      const state = this.attr.store.getState()
+      const trace = state.trace
+      if (!trace.hasOwnProperty('traceId')) {
+        return
+      }
+      // traceToMustache expects []trace with one element
+      const modelview = traceToMustache([trace], logsUrl);
+
+      this.$node.html(traceTemplate(modelview));
 
       FilterAllServicesUI.attachTo('#filterAllServices', {
         totalServices: $('.trace-details.services span').length
@@ -36,17 +46,20 @@ const TracePageComponent = component(function TracePage() {
       this.$node.find('#traceJsonLink').click(e => {
         e.preventDefault();
         this.trigger('uiRequestJsonPanel', {title: `Trace ${this.attr.traceId}`,
-                                            obj: data.trace,
+                                            obj: [trace],
                                             link: `/api/v1/trace/${this.attr.traceId}`});
       });
 
       $('.annotation:not(.core)').tooltip({placement: 'left'});
     });
+
+    this.attr.store.dispatch(fetchTrace(this.attr.traceId))
   });
 });
 
-export default function initializeTrace(traceId, config) {
+export default function initializeTrace(store, traceId, config) {
   TracePageComponent.attachTo('.content', {
+    store,
     traceId,
     config
   });
