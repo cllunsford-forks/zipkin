@@ -4,7 +4,8 @@ import $ from 'jquery';
 import chosen from 'chosen-npm/public/chosen.jquery.js'; // eslint-disable-line no-unused-vars
 import queryString from 'query-string';
 
-import { fetchServices, selectService } from '../actions/services'
+import { selectService } from '../actions/services'
+import { fetchSpansByService } from '../actions/spans'
 
 export default component(function serviceName() {
   this.onChange = function() {
@@ -13,8 +14,8 @@ export default component(function serviceName() {
   };
 
   this.triggerChange = function(name) {
-    this.$node.trigger('uiChangeServiceName', name);
     this.attr.store.dispatch(selectService(name));
+    this.attr.store.dispatch(fetchSpansByService(name));
   };
 
   this.updateServiceNameDropdown = function(ev, data) {
@@ -26,13 +27,6 @@ export default component(function serviceName() {
     this.$node.find(`[value="${data.lastServiceName}"]`).attr('selected', 'selected');
 
     this.trigger('chosen:updated');
-
-    // On the first view there won't be a selected or "last" service
-    // name.  Instead the first service at the top of the list will be
-    // displayed, so load the span names for the top service too.
-    if (!data.lastServiceName && data.names && data.names.length > 1) {
-      this.$node.trigger('uiFirstLoadSpanNames', data.names[0]);
-    }
   };
 
   this.after('initialize', function() {

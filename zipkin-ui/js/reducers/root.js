@@ -1,10 +1,13 @@
 import { combineReducers } from 'redux'
-import { selectedService, serviceNames, serviceError } from './services'
+import { error } from './error'
+import { selectedService, serviceNames } from './services'
+import { spansByService } from './spans'
 
 const rootReducer = combineReducers({
   selectedService,
   serviceNames,
-  serviceError,
+  error,
+  spansByService,
 })
 
 export default rootReducer

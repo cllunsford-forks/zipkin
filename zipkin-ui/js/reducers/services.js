@@ -23,11 +23,3 @@ export function serviceNames(state = [], action) {
   }
 }
 
-export function serviceError(state = '', action) {
-  switch (action.type) {
-    case REQUEST_SERVICES_FAILURE:
-      return action.error
-    default:
-      return state
-  }
-}

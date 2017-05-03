@@ -3,7 +3,6 @@ import $ from 'jquery';
 import timeago from 'timeago'; // eslint-disable-line no-unused-vars
 import queryString from 'query-string';
 import DefaultData from '../component_data/default';
-import SpanNamesData from '../component_data/spanNames';
 import ServiceNameUI from '../component_ui/serviceName';
 import SpanNameUI from '../component_ui/spanName';
 import InfoPanelUI from '../component_ui/infoPanel';
@@ -42,15 +41,11 @@ const DefaultPageComponent = component(function DefaultPage() {
     this.trigger(document, 'navigate', {route: 'index'});
 
     // Begin Redux Bridge
-    this.on('uiChangeServiceName', (e, name) => {
-      this.attr.store.dispatch(selectService(name))
-    });
-
     this.attr.store.subscribe(() => {
       const state = this.attr.store.getState()
 
-      if (state.serviceError) {
-        this.trigger('uiServerError', getError('cannot load service names', state.serviceError));
+      if (state.error.hasOwnProperty('message')) {
+        this.trigger('uiServerError', getError(state.error.message, state.error.error));
       }
     })
 
@@ -83,9 +78,8 @@ const DefaultPageComponent = component(function DefaultPage() {
         ...modelView
       }));
 
-      SpanNamesData.attachTo(document);
       ServiceNameUI.attachTo('#serviceName', {store: this.attr.store});
-      SpanNameUI.attachTo('#spanName');
+      SpanNameUI.attachTo('#spanName', {store: this.attr.store});
       InfoPanelUI.attachTo('#infoPanel');
       InfoButtonUI.attachTo('button.info-request');
       JsonPanelUI.attachTo('#jsonPanel');

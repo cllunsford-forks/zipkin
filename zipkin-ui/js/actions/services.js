@@ -8,9 +8,10 @@ function requestServices() {
 }
 
 export const REQUEST_SERVICES_FAILURE = 'REQUEST_SERVICES_FAILURE'
-function requestServicesFailure(error) {
+function requestServicesFailure(message, error) {
   return {
     type: REQUEST_SERVICES_FAILURE,
+    message,
     error
   }
 }
@@ -38,6 +39,8 @@ export function fetchServices() {
       .then(handleErrors)
       .then(response => response.json())
       .then(json => dispatch(receiveServices(json)))
-      .catch(error => dispatch(requestServicesFailure(error)))
+      .catch(error =>
+        dispatch(requestServicesFailure('cannot load service names', error))
+      )
   }
 }
