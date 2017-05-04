@@ -1,8 +1,8 @@
 import {component} from 'flightjs';
 import $ from 'jquery';
+import Cookies from 'js-cookie';
 import timeago from 'timeago'; // eslint-disable-line no-unused-vars
 import queryString from 'query-string';
-import DefaultData from '../component_data/default';
 import ServiceNameUI from '../component_ui/serviceName';
 import SpanNameUI from '../component_ui/spanName';
 import InfoPanelUI from '../component_ui/infoPanel';
@@ -14,8 +14,12 @@ import TimeStampUI from '../component_ui/timeStamp';
 import BackToTop from '../component_ui/backToTop';
 import {defaultTemplate} from '../templates';
 import {getError} from '../component_ui/error';
+import {traceSummary, traceSummariesToMustache} from '../component_ui/traceSummary';
 
 import { fetchServices, selectService } from '../actions/services'
+import { fetchSpansByService } from '../actions/spans'
+import { fetchTraces } from '../actions/traces'
+import { showRequestJSON } from '../actions/ui'
 
 const DefaultPageComponent = component(function DefaultPage() {
   const sortOptions = [
@@ -36,33 +40,48 @@ const DefaultPageComponent = component(function DefaultPage() {
     };
   };
 
+  this.render = function(query) {
+  }
+
   this.after('initialize', function() {
     window.document.title = 'Zipkin - Index';
     this.trigger(document, 'navigate', {route: 'index'});
 
-    // Begin Redux Bridge
+    // Formerly convertToApiQuery
+    let query = queryString.parse(window.location.search);
+    if (query.startTs) {
+      if (query.endTs > query.startTs) {
+        query.lookback = String(query.endTs - query.startTs);
+      }
+      delete query.startTs;
+    }
+
+    const limit = query.limit || this.attr.config('queryLimit');
+    const minDuration = query.minDuration;
+    const endTs = query.endTs || new Date().getTime();
+    const startTs = query.startTs || (endTs - this.attr.config('defaultLookback'));
+    const serviceName = query.serviceName || Cookies.get('last-serviceName');
+    const annotationQuery = query.annotationQuery || '';
+    const sortOrder = query.sortOrder || 'duration-desc';
+    const queryWasPerformed = serviceName && serviceName.length > 0;
+    const apiURL = `/api/v1/traces?${queryString.stringify(query)}`;
+
     this.attr.store.subscribe(() => {
       const state = this.attr.store.getState()
+      const traces = state.traces
 
+      const modelView = {
+        traces: traceSummariesToMustache(serviceName, traces.map(traceSummary)),
+        apiURL,
+        rawResponse: traces
+      };
+      const serviceSpans = state.spansByService[state.selectedService] || []
+
+      //replace with props to ServerError component
       if (state.error.hasOwnProperty('message')) {
         this.trigger('uiServerError', getError(state.error.message, state.error.error));
       }
-    })
 
-    this.attr.store.dispatch(fetchServices())
-    // End Redux Bridge
-
-    const query = queryString.parse(window.location.search);
-
-    this.on(document, 'defaultPageModelView', function(ev, modelView) {
-      const limit = query.limit || this.attr.config('queryLimit');
-      const minDuration = query.minDuration;
-      const endTs = query.endTs || new Date().getTime();
-      const startTs = query.startTs || (endTs - this.attr.config('defaultLookback'));
-      const serviceName = query.serviceName || '';
-      const annotationQuery = query.annotationQuery || '';
-      const sortOrder = query.sortOrder || 'duration-desc';
-      const queryWasPerformed = serviceName && serviceName.length > 0;
       this.$node.html(defaultTemplate({
         limit,
         minDuration,
@@ -74,15 +93,29 @@ const DefaultPageComponent = component(function DefaultPage() {
         count: modelView.traces.length,
         sortOrderOptions: sortOptions,
         sortOrderSelected: sortSelected(sortOrder),
-        apiURL: modelView.apiURL,
+        apiURL: apiURL,
         ...modelView
       }));
 
-      ServiceNameUI.attachTo('#serviceName', {store: this.attr.store});
-      SpanNameUI.attachTo('#spanName', {store: this.attr.store});
+      // teardown components which receive triggers to prevent
+      //  duplicate triggers for each re-render loop
+      InfoPanelUI.teardownAll();
+      JsonPanelUI.teardownAll();
+
+      ServiceNameUI.attachTo('#serviceName', {
+        store: this.attr.store,
+        names: state.serviceNames,
+        lastServiceName: state.selectedService
+      });
+      SpanNameUI.attachTo('#spanName', {serviceSpans});
       InfoPanelUI.attachTo('#infoPanel');
       InfoButtonUI.attachTo('button.info-request');
-      JsonPanelUI.attachTo('#jsonPanel');
+      JsonPanelUI.attachTo('#jsonPanel', {
+        title: 'Search Results',
+        obj: modelView.rawResponse,
+        link: modelView.apiURL
+      });
+
       TraceFiltersUI.attachTo('#trace-filters');
       TracesUI.attachTo('#traces');
       TimeStampUI.attachTo('#end-ts');
@@ -93,13 +126,17 @@ const DefaultPageComponent = component(function DefaultPage() {
 
       this.$node.find('#rawResultsJsonLink').click(e => {
         e.preventDefault();
-        this.trigger('uiRequestJsonPanel', {title: 'Search Results',
-                                            obj: modelView.rawResponse,
-                                            link: modelView.apiURL});
+        this.trigger('uiRequestJsonPanel', {});
       });
-    });
+    })
 
-    DefaultData.attachTo(document);
+    // Select current service on initial page load
+    this.attr.store.dispatch(selectService(serviceName))
+    this.attr.store.dispatch(fetchSpansByService(serviceName));
+    this.attr.store.dispatch(fetchServices())
+    if (query.serviceName) {
+      this.attr.store.dispatch(fetchTraces(query))
+    }
   });
 });
 

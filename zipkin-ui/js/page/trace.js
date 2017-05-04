@@ -10,7 +10,7 @@ import FilterLabelUI from '../component_ui/filterLabel';
 import ZoomOut from '../component_ui/zoomOutSpans';
 import {traceTemplate} from '../templates';
 import traceToMustache from '../../js/component_ui/traceToMustache';
-import { fetchTrace } from '../actions/trace'
+import { fetchTrace } from '../actions/traces'
 
 const TracePageComponent = component(function TracePage() {
   this.after('initialize', function() {

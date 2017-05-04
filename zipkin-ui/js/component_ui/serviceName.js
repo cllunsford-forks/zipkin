@@ -9,37 +9,31 @@ import { fetchSpansByService } from '../actions/spans'
 
 export default component(function serviceName() {
   this.onChange = function() {
-    Cookies.set('last-serviceName', this.$node.val());
-    this.triggerChange(this.$node.val());
-  };
-
-  this.triggerChange = function(name) {
-    this.attr.store.dispatch(selectService(name));
-    this.attr.store.dispatch(fetchSpansByService(name));
+    const serviceName = this.$node.val();
+    Cookies.set('last-serviceName', serviceName);
+    this.attr.store.dispatch(selectService(serviceName));
+    this.attr.store.dispatch(fetchSpansByService(serviceName));
   };
 
   this.updateServiceNameDropdown = function(ev, data) {
-    $('#serviceName').empty();
-    $.each(data.names, (i, item) => {
-      $('<option>').val(item).text(item).appendTo('#serviceName');
-    });
-
-    this.$node.find(`[value="${data.lastServiceName}"]`).attr('selected', 'selected');
+    this.render(data.names, data.lastServiceName);
 
     this.trigger('chosen:updated');
   };
 
+  this.render = function(names, lastServiceName) {
+    $('#serviceName').empty();
+    $.each(names, (i, item) => {
+      $('<option>').val(item).text(item).appendTo('#serviceName');
+    });
+
+    this.$node.find(`[value="${lastServiceName}"]`).attr('selected', 'selected');
+  }
+
   this.after('initialize', function() {
-    const name = queryString.parse(window.location.search).serviceName
-        || Cookies.get('last-serviceName');
-    this.triggerChange(name);
+    this.render(this.attr.names, this.attr.lastServiceName);
 
     this.$node.chosen({search_contains: true});
     this.on('change', this.onChange);
-    this.attr.store.subscribe(() => {
-      const state = this.attr.store.getState()
-
-      this.updateServiceNameDropdown({}, {names: state.serviceNames, lastServiceName: state.selectedService});
-    })
   });
 });

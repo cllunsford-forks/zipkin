@@ -30,11 +30,7 @@ export default component(function spanName() {
     this.$node.chosen({
       search_contains: true
     });
-    this.attr.store.subscribe(() => {
-      const state = this.attr.store.getState()
 
-      const serviceSpans = state.spansByService[state.selectedService] || []
-      this.updateSpans({}, {spans: serviceSpans});
-    })
+    this.updateSpans({}, {spans: this.attr.serviceSpans});
   });
 });
