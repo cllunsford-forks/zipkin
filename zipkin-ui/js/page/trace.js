@@ -32,11 +32,17 @@ const TracePageComponent = component(function TracePage() {
 
       this.$node.html(traceTemplate(modelview));
 
+      JsonPanelUI.teardownAll();
+
       FilterAllServicesUI.attachTo('#filterAllServices', {
         totalServices: $('.trace-details.services span').length
       });
       FullPageSpinnerUI.attachTo('#fullPageSpinner');
-      JsonPanelUI.attachTo('#jsonPanel');
+      JsonPanelUI.attachTo('#jsonPanel', {
+        title: `Trace ${this.attr.traceId}`,
+        obj: [trace],
+        link: `/api/v1/trace/${this.attr.traceId}`
+      });
       ServiceFilterSearchUI.attachTo('#serviceFilterSearch');
       SpanPanelUI.attachTo('#spanPanel');
       TraceUI.attachTo('#trace-container');
@@ -45,9 +51,7 @@ const TracePageComponent = component(function TracePage() {
 
       this.$node.find('#traceJsonLink').click(e => {
         e.preventDefault();
-        this.trigger('uiRequestJsonPanel', {title: `Trace ${this.attr.traceId}`,
-                                            obj: [trace],
-                                            link: `/api/v1/trace/${this.attr.traceId}`});
+        this.trigger('uiRequestJsonPanel', {});
       });
 
       $('.annotation:not(.core)').tooltip({placement: 'left'});
