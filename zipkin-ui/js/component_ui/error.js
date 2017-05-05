@@ -4,7 +4,7 @@ import $ from 'jquery';
 export default component(function ErrorUI() {
   this.after('initialize', function() {
     this.on(document, 'uiServerError', function(evt, e) {
-      this.$node.html($('<div></div>').text(`ERROR: ${e.desc}: ${e.message}`));
+      this.$node.append($('<div></div>').text(`ERROR: ${e.desc}: ${e.message}`));
       this.$node.show();
     });
   });

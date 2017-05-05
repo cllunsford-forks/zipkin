@@ -13,7 +13,7 @@ import TracesUI from '../component_ui/traces';
 import TimeStampUI from '../component_ui/timeStamp';
 import BackToTop from '../component_ui/backToTop';
 import {defaultTemplate} from '../templates';
-import {getError} from '../component_ui/error';
+import {getError, errToStr} from '../component_ui/error';
 import {traceSummary, traceSummariesToMustache} from '../component_ui/traceSummary';
 
 import { fetchServices, selectService } from '../actions/services'
@@ -70,16 +70,15 @@ const DefaultPageComponent = component(function DefaultPage() {
       const state = this.attr.store.getState()
       const traces = state.traces
 
-      const modelView = {
+      let modelView = {
         traces: traceSummariesToMustache(serviceName, traces.map(traceSummary)),
         apiURL,
-        rawResponse: traces
+        rawResponse: traces,
       };
       const serviceSpans = state.spansByService[state.selectedService] || []
 
-      //replace with props to ServerError component
       if (state.error.hasOwnProperty('message')) {
-        this.trigger('uiServerError', getError(state.error.message, state.error.error));
+        modelView.queryError = errToStr(state.error)
       }
 
       this.$node.html(defaultTemplate({
