@@ -21,6 +21,7 @@ function receiveServices(data) {
   return {
     type: RECEIVE_SERVICES,
     names: data,
+    lastUpdated: Date.now()
   }
 }
 
@@ -42,5 +43,24 @@ export function fetchServices() {
       .catch(error =>
         dispatch(requestServicesFailure('cannot load service names', error))
       )
+  }
+}
+
+function shouldFetchServices(state) {
+  const services = state.serviceNames
+  if (!services.names) {
+    return true
+  } else {
+    return false
+  }
+}
+
+export function fetchServicesIfNeeded() {
+  return (dispatch, getState) => {
+    if (shouldFetchServices(getState())) {
+      return dispatch(fetchServices())
+    } else {
+      return Promise.resolve()
+    }
   }
 }

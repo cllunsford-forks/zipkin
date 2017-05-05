@@ -8,7 +8,11 @@ export function spansByService(state = {}, action) {
   switch (action.type) {
     case RECEIVE_SPANS:
       return Object.assign({}, state, {
-        [action.serviceName]: action.spans
+        [action.serviceName]: {
+          spans: action.spans,
+          lastUpdated: action.lastUpdated,
+          isUpdating: false
+        }
       })
     default:
       return state

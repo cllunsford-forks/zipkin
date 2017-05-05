@@ -16,7 +16,7 @@ import configStore from './store/configStore'
 const store = configStore()
 
 loadConfig().then(config => {
-  debug.enable(true);
+  //debug.enable(true);
   compose.mixin(registry, [advice.withAdvice]);
 
   CommonUI.attachTo(window.document.body, {config});

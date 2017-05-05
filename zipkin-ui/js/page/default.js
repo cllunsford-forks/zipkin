@@ -16,8 +16,8 @@ import {defaultTemplate} from '../templates';
 import {getError, errToStr} from '../component_ui/error';
 import {traceSummary, traceSummariesToMustache} from '../component_ui/traceSummary';
 
-import { fetchServices, selectService } from '../actions/services'
-import { fetchSpansByService } from '../actions/spans'
+import { fetchServicesIfNeeded, selectService } from '../actions/services'
+import { fetchSpansIfNeeded } from '../actions/spans'
 import { fetchTraces } from '../actions/traces'
 
 const DefaultPageComponent = component(function DefaultPage() {
@@ -74,7 +74,7 @@ const DefaultPageComponent = component(function DefaultPage() {
         apiURL,
         rawResponse: traces,
       };
-      const serviceSpans = state.spansByService[state.selectedService] || []
+      const serviceSpans = state.spansByService.hasOwnProperty(state.selectedService) ? state.spansByService[state.selectedService].spans : [];
 
       if (state.error.hasOwnProperty('message')) {
         modelView.queryError = errToStr(state.error)
@@ -104,7 +104,7 @@ const DefaultPageComponent = component(function DefaultPage() {
 
       ServiceNameUI.attachTo('#serviceName', {
         store: this.attr.store,
-        names: state.serviceNames,
+        names: state.serviceNames.names,
         lastServiceName: state.selectedService
       });
       SpanNameUI.attachTo('#spanName', {serviceSpans});
@@ -132,8 +132,8 @@ const DefaultPageComponent = component(function DefaultPage() {
 
     // Select current service on initial page load
     this.attr.store.dispatch(selectService(serviceName))
-    this.attr.store.dispatch(fetchSpansByService(serviceName));
-    this.attr.store.dispatch(fetchServices())
+    this.attr.store.dispatch(fetchSpansIfNeeded(serviceName));
+    this.attr.store.dispatch(fetchServicesIfNeeded())
     if (query.serviceName) {
       this.attr.store.dispatch(fetchTraces(query))
     }

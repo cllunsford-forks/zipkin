@@ -5,14 +5,14 @@ import chosen from 'chosen-npm/public/chosen.jquery.js'; // eslint-disable-line 
 import queryString from 'query-string';
 
 import { selectService } from '../actions/services'
-import { fetchSpansByService } from '../actions/spans'
+import { fetchSpansIfNeeded } from '../actions/spans'
 
 export default component(function serviceName() {
   this.onChange = function() {
     const serviceName = this.$node.val();
     Cookies.set('last-serviceName', serviceName);
     this.attr.store.dispatch(selectService(serviceName));
-    this.attr.store.dispatch(fetchSpansByService(serviceName));
+    this.attr.store.dispatch(fetchSpansIfNeeded(serviceName));
   };
 
   this.updateServiceNameDropdown = function(ev, data) {
