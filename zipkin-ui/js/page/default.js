@@ -19,7 +19,6 @@ import {traceSummary, traceSummariesToMustache} from '../component_ui/traceSumma
 import { fetchServices, selectService } from '../actions/services'
 import { fetchSpansByService } from '../actions/spans'
 import { fetchTraces } from '../actions/traces'
-import { showRequestJSON } from '../actions/ui'
 
 const DefaultPageComponent = component(function DefaultPage() {
   const sortOptions = [
@@ -96,8 +95,10 @@ const DefaultPageComponent = component(function DefaultPage() {
         ...modelView
       }));
 
-      // teardown components which receive triggers to prevent
+      // teardown components which send/receive triggers to prevent
       //  duplicate triggers for each re-render loop
+      ServiceNameUI.teardownAll();
+      SpanNameUI.teardownAll();
       InfoPanelUI.teardownAll();
       JsonPanelUI.teardownAll();
 
