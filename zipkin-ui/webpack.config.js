@@ -23,7 +23,7 @@ var webpackConfig = {
             test: /\.mustache$/,
             loader: 'mustache'
         }, {
-            test: /.scss$/,
+            test: /\.scss$/,
             loader: ExtractTextPlugin.extract('style-loader', 'css-loader?sourceMap!sass-loader?sourceMap')
         }, {
             test: /\.woff2?$|\.ttf$|\.eot$|\.svg|\.png$/,

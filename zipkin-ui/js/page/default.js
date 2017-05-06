@@ -3,7 +3,6 @@ import $ from 'jquery';
 import Cookies from 'js-cookie';
 import timeago from 'timeago'; // eslint-disable-line no-unused-vars
 import queryString from 'query-string';
-import ServiceNameUI from '../component_ui/serviceName';
 import SpanNameUI from '../component_ui/spanName';
 import InfoPanelUI from '../component_ui/infoPanel';
 import InfoButtonUI from '../component_ui/infoButton';
@@ -19,6 +18,10 @@ import {traceSummary, traceSummariesToMustache} from '../component_ui/traceSumma
 import { fetchServicesIfNeeded, selectService } from '../actions/services'
 import { fetchSpansIfNeeded } from '../actions/spans'
 import { fetchTraces } from '../actions/traces'
+
+import React from 'react'
+import ReactDOM from 'react-dom'
+import ServiceNameDropdown from '../components/ServiceNameDropdown'
 
 const DefaultPageComponent = component(function DefaultPage() {
   const sortOptions = [
@@ -39,12 +42,15 @@ const DefaultPageComponent = component(function DefaultPage() {
     };
   };
 
-  this.render = function(query) {
-  }
-
   this.after('initialize', function() {
     window.document.title = 'Zipkin - Index';
     this.trigger(document, 'navigate', {route: 'index'});
+
+    const handleSelectService = (serviceName) => {
+      Cookies.set('last-serviceName', serviceName);
+      this.attr.store.dispatch(selectService(serviceName));
+      this.attr.store.dispatch(fetchSpansIfNeeded(serviceName));
+    }
 
     // Formerly convertToApiQuery
     let query = queryString.parse(window.location.search);
@@ -97,16 +103,19 @@ const DefaultPageComponent = component(function DefaultPage() {
 
       // teardown components which send/receive triggers to prevent
       //  duplicate triggers for each re-render loop
-      ServiceNameUI.teardownAll();
       SpanNameUI.teardownAll();
       InfoPanelUI.teardownAll();
       JsonPanelUI.teardownAll();
 
-      ServiceNameUI.attachTo('#serviceName', {
-        store: this.attr.store,
-        names: state.serviceNames.names,
-        lastServiceName: state.selectedService
-      });
+      const serviceNameDiv = document.getElementById('serviceNameDiv')
+      ReactDOM.unmountComponentAtNode(serviceNameDiv)
+      ReactDOM.render(
+        <ServiceNameDropdown
+          names={state.serviceNames.names}
+          lastServiceName={state.selectedService}
+          handleChange={handleSelectService}
+        />, serviceNameDiv)
+
       SpanNameUI.attachTo('#spanName', {serviceSpans});
       InfoPanelUI.attachTo('#infoPanel');
       InfoButtonUI.attachTo('button.info-request');

@@ -14,7 +14,10 @@ export function selectedService(state = '', action) {
   }
 }
 
-export function serviceNames(state = {}, action) {
+export function serviceNames(state = {
+  names: [],
+  isUpdating: false
+}, action) {
   switch (action.type) {
     case REQUEST_SERVICES:
       return Object.assign({}, state, {

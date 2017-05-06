@@ -48,7 +48,7 @@ export function fetchServices() {
 
 function shouldFetchServices(state) {
   const services = state.serviceNames
-  if (!services.names) {
+  if (services.names.length == 0) {
     return true
   } else {
     return false
