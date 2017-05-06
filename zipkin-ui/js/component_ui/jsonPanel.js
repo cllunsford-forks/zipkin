@@ -1,7 +1,7 @@
 import {component} from 'flightjs';
 
 export default component(function jsonPanel() {
-  this.show = function(e, data) {
+  this.show = function() {
     const props = this.attr;
     this.$node.find('.modal-title').text(props.title);
 

@@ -10,22 +10,22 @@ import FilterLabelUI from '../component_ui/filterLabel';
 import ZoomOut from '../component_ui/zoomOutSpans';
 import {traceTemplate} from '../templates';
 import traceToMustache from '../../js/component_ui/traceToMustache';
-import { fetchTrace } from '../actions/traces'
+import {fetchTrace} from '../actions/traces';
 
 const TracePageComponent = component(function TracePage() {
   this.after('initialize', function() {
     window.document.title = 'Zipkin - Traces';
 
-    let logsUrl = this.attr.config('logsUrl')
+    let logsUrl = this.attr.config('logsUrl');
     if (logsUrl) {
       logsUrl = logsUrl.replace('{traceId}', this.attr.traceId);
     }
 
     this.attr.store.subscribe(() => {
-      const state = this.attr.store.getState()
-      const trace = state.trace
+      const state = this.attr.store.getState();
+      const trace = state.trace;
       if (!trace.hasOwnProperty('traceId')) {
-        return
+        return;
       }
       // traceToMustache expects []trace with one element
       const modelview = traceToMustache([trace], logsUrl);
@@ -57,7 +57,7 @@ const TracePageComponent = component(function TracePage() {
       $('.annotation:not(.core)').tooltip({placement: 'left'});
     });
 
-    this.attr.store.dispatch(fetchTrace(this.attr.traceId))
+    this.attr.store.dispatch(fetchTrace(this.attr.traceId));
   });
 });
 

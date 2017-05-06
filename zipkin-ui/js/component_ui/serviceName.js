@@ -2,17 +2,16 @@ import {component} from 'flightjs';
 import Cookies from 'js-cookie';
 import $ from 'jquery';
 import chosen from 'chosen-npm/public/chosen.jquery.js'; // eslint-disable-line no-unused-vars
-import queryString from 'query-string';
 
-import { selectService } from '../actions/services'
-import { fetchSpansIfNeeded } from '../actions/spans'
+import {selectService} from '../actions/services';
+import {fetchSpansIfNeeded} from '../actions/spans';
 
 export default component(function serviceName() {
   this.onChange = function() {
-    const serviceName = this.$node.val();
-    Cookies.set('last-serviceName', serviceName);
-    this.attr.store.dispatch(selectService(serviceName));
-    this.attr.store.dispatch(fetchSpansIfNeeded(serviceName));
+    const name = this.$node.val();
+    Cookies.set('last-serviceName', name);
+    this.attr.store.dispatch(selectService(name));
+    this.attr.store.dispatch(fetchSpansIfNeeded(name));
   };
 
   this.updateServiceNameDropdown = function(ev, data) {
@@ -28,7 +27,7 @@ export default component(function serviceName() {
     });
 
     this.$node.find(`[value="${lastServiceName}"]`).attr('selected', 'selected');
-  }
+  };
 
   this.after('initialize', function() {
     this.render(this.attr.names, this.attr.lastServiceName);

@@ -7,12 +7,12 @@ import ServiceDataModal from '../component_ui/serviceDataModal';
 import TimeStampUI from '../component_ui/timeStamp';
 import GoToDependencyUI from '../component_ui/goToDependency';
 import {dependenciesTemplate} from '../templates';
-import { fetchDependencies } from '../actions/dependencies';
+import {fetchDependencies} from '../actions/dependencies';
 
 const DependencyPageComponent = component(function DependencyPage() {
   this.buildServiceData = function(links) {
-    let services = {};
-    let dependencies = {};
+    const services = {};
+    const dependencies = {};
     links.forEach(link => {
       const {parent, child} = link;
 
@@ -25,13 +25,13 @@ const DependencyPageComponent = component(function DependencyPage() {
       services[parent].uses.push(child);
       services[child].usedBy.push(parent);
     });
-    return {services, dependencies, links}
+    return {services, dependencies, links};
   };
 
   this.render = function() {
     const state = this.attr.store.getState();
 
-    const { services, dependencies, links } = this.buildServiceData(state.dependencyLinks)
+    const {services, dependencies, links} = this.buildServiceData(state.dependencyLinks);
 
     this.$node.html(dependenciesTemplate());
 
@@ -44,11 +44,11 @@ const DependencyPageComponent = component(function DependencyPage() {
     ServiceDataModal.teardownAll();
 
     DependencyGraphUI.attachTo('#dependency-container', {links});
-    ServiceDataModal.attachTo('#service-data-modal-container',{services, dependencies, links});
+    ServiceDataModal.attachTo('#service-data-modal-container', {services, dependencies, links});
     TimeStampUI.attachTo('#end-ts');
     TimeStampUI.attachTo('#start-ts');
     GoToDependencyUI.attachTo('#dependency-query-form');
-  }
+  };
 
   this.after('initialize', function() {
     window.document.title = 'Zipkin - Dependency';

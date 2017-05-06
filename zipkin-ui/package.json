@@ -33,6 +33,7 @@
   },
   "devDependencies": {
     "babel-core": "^6.4.5",
+    "babel-eslint": "^7.2.3",
     "babel-loader": "^6.2.1",
     "babel-plugin-transform-object-rest-spread": "^6.5.0",
     "babel-polyfill": "^6.7.4",

@@ -12,16 +12,16 @@ import TracesUI from '../component_ui/traces';
 import TimeStampUI from '../component_ui/timeStamp';
 import BackToTop from '../component_ui/backToTop';
 import {defaultTemplate} from '../templates';
-import {getError, errToStr} from '../component_ui/error';
+import {errToStr} from '../component_ui/error';
 import {traceSummary, traceSummariesToMustache} from '../component_ui/traceSummary';
 
-import { fetchServicesIfNeeded, selectService } from '../actions/services'
-import { fetchSpansIfNeeded } from '../actions/spans'
-import { fetchTraces } from '../actions/traces'
+import {fetchServicesIfNeeded, selectService} from '../actions/services';
+import {fetchSpansIfNeeded} from '../actions/spans';
+import {fetchTraces} from '../actions/traces';
 
-import React from 'react'
-import ReactDOM from 'react-dom'
-import ServiceNameDropdown from '../components/ServiceNameDropdown'
+import React from 'react';
+import ReactDOM from 'react-dom';
+import ServiceNameDropdown from '../components/ServiceNameDropdown';
 
 const DefaultPageComponent = component(function DefaultPage() {
   const sortOptions = [
@@ -50,10 +50,10 @@ const DefaultPageComponent = component(function DefaultPage() {
       Cookies.set('last-serviceName', serviceName);
       this.attr.store.dispatch(selectService(serviceName));
       this.attr.store.dispatch(fetchSpansIfNeeded(serviceName));
-    }
+    };
 
     // Formerly convertToApiQuery
-    let query = queryString.parse(window.location.search);
+    const query = queryString.parse(window.location.search);
     if (query.startTs) {
       if (query.endTs > query.startTs) {
         query.lookback = String(query.endTs - query.startTs);
@@ -72,18 +72,19 @@ const DefaultPageComponent = component(function DefaultPage() {
     const apiURL = `/api/v1/traces?${queryString.stringify(query)}`;
 
     this.attr.store.subscribe(() => {
-      const state = this.attr.store.getState()
-      const traces = state.traces
+      const state = this.attr.store.getState();
+      const traces = state.traces;
 
-      let modelView = {
+      const modelView = {
         traces: traceSummariesToMustache(serviceName, traces.map(traceSummary)),
         apiURL,
         rawResponse: traces,
       };
-      const serviceSpans = state.spansByService.hasOwnProperty(state.selectedService) ? state.spansByService[state.selectedService].spans : [];
+      const serviceSpans = state.spansByService.hasOwnProperty(state.selectedService)
+        ? state.spansByService[state.selectedService].spans : [];
 
       if (state.error.hasOwnProperty('message')) {
-        modelView.queryError = errToStr(state.error)
+        modelView.queryError = errToStr(state.error);
       }
 
       this.$node.html(defaultTemplate({
@@ -97,7 +98,7 @@ const DefaultPageComponent = component(function DefaultPage() {
         count: modelView.traces.length,
         sortOrderOptions: sortOptions,
         sortOrderSelected: sortSelected(sortOrder),
-        apiURL: apiURL,
+        apiURL,
         ...modelView
       }));
 
@@ -107,14 +108,14 @@ const DefaultPageComponent = component(function DefaultPage() {
       InfoPanelUI.teardownAll();
       JsonPanelUI.teardownAll();
 
-      const serviceNameDiv = document.getElementById('serviceNameDiv')
-      ReactDOM.unmountComponentAtNode(serviceNameDiv)
+      const serviceNameDiv = document.getElementById('serviceNameDiv');
+      ReactDOM.unmountComponentAtNode(serviceNameDiv);
       ReactDOM.render(
         <ServiceNameDropdown
           names={state.serviceNames.names}
           lastServiceName={state.selectedService}
           handleChange={handleSelectService}
-        />, serviceNameDiv)
+        />, serviceNameDiv);
 
       SpanNameUI.attachTo('#spanName', {serviceSpans});
       InfoPanelUI.attachTo('#infoPanel');
@@ -137,14 +138,14 @@ const DefaultPageComponent = component(function DefaultPage() {
         e.preventDefault();
         this.trigger('uiRequestJsonPanel', {});
       });
-    })
+    });
 
     // Select current service on initial page load
-    this.attr.store.dispatch(selectService(serviceName))
+    this.attr.store.dispatch(selectService(serviceName));
     this.attr.store.dispatch(fetchSpansIfNeeded(serviceName));
-    this.attr.store.dispatch(fetchServicesIfNeeded())
+    this.attr.store.dispatch(fetchServicesIfNeeded());
     if (query.serviceName) {
-      this.attr.store.dispatch(fetchTraces(query))
+      this.attr.store.dispatch(fetchTraces(query));
     }
   });
 });

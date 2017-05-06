@@ -1,5 +1,5 @@
-import 'babel-polyfill'
-import 'whatwg-fetch'
+import 'babel-polyfill';
+import 'whatwg-fetch';
 
 // Flightjs
 import {compose, registry, advice, debug} from 'flightjs';
@@ -12,11 +12,11 @@ import loadConfig from './config';
 import {errToStr} from './component_ui/error';
 
 // React
-import configStore from './store/configStore'
-const store = configStore()
+import configStore from './store/configStore';
+const store = configStore();
 
 loadConfig().then(config => {
-  //debug.enable(true);
+  debug.enable(true);
   compose.mixin(registry, [advice.withAdvice]);
 
   CommonUI.attachTo(window.document.body, {config});

@@ -24,12 +24,12 @@ export default component(function serviceDataModal() {
       });
       $modal.find('#serviceUsedByList').append($name);
     });
-  
+
     $modal.find('#serviceUsesList').html('');
     data.uses.sort((a, b) =>
       a.toLowerCase().localeCompare(b.toLowerCase())
     );
-  
+
     data.uses.forEach(uses => {
       const $name = $(`<li><a href="">${uses}</a></li>`);
       $name.find('a').click(ev => {
@@ -41,12 +41,12 @@ export default component(function serviceDataModal() {
       });
       $modal.find('#serviceUsesList').append($name);
     });
-  
+
     $modal.find('#serviceModalTitle').text(data.serviceName);
-  
+
     $modal.modal('show');
     $('#dependencyModal').modal('hide');
-  }
+  };
 
   this.renderDependencyModal = function(event, eData) {
     const data = this.attr.dependencies[eData.parent][eData.child];
@@ -59,7 +59,7 @@ export default component(function serviceDataModal() {
         serviceName: data.parent
       });
     });
-  
+
     const $childElement = $(`<a href="">${data.child}</a>`);
     $childElement.click(ev => {
       ev.preventDefault();
@@ -67,14 +67,14 @@ export default component(function serviceDataModal() {
         serviceName: data.child
       });
     });
-  
+
     $modal.find('#dependencyModalParent').html($parentElement);
     $modal.find('#dependencyModalChild').html($childElement);
     $modal.find('#dependencyCallCount').text(data.callCount);
-  
+
     $('#serviceModal').modal('hide');
     $modal.modal('show');
-  }
+  };
 
   this.after('initialize', function() {
     this.on(document, 'showServiceDataModal', this.renderServiceDataModal);

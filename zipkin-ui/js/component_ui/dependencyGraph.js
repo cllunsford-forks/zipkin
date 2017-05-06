@@ -7,7 +7,7 @@ const dagre = window.dagreD3;
 
 export default component(function dependencyGraph() {
   this.after('initialize', function afterInitialize(container) {
-    const links = this.attr.links
+    const links = this.attr.links;
 
     const _this = this;
     const rootSvg = container.querySelector('svg');
